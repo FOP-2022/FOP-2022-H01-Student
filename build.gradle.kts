@@ -9,9 +9,9 @@ plugins {
 
 submit {
   assignmentId = "h01" // do not change assignmentId
-  studentId = null // TU-ID  z.B. "ab12cdef"
-  firstName = null
-  lastName = null
+  studentId = "Upper"
+  firstName = "Moon"
+  lastName = "1"
   // Optionally require tests for prepareSubmission task. Default is true
   requireTests = true
 }
