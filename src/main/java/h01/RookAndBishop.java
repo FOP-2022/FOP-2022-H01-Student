@@ -2,6 +2,7 @@ package h01;
 
 import fopbot.Direction;
 import fopbot.Robot;
+import fopbot.World;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -31,8 +32,7 @@ public class RookAndBishop {
    * @return coins between 12 to 20
    */
   public int randomCoins() {
-    int coins = ThreadLocalRandom.current().nextInt(12, 20);
-    return coins;
+    return ThreadLocalRandom.current().nextInt(12, 20);
   }
 
   /**
@@ -84,7 +84,38 @@ public class RookAndBishop {
 
     Robot rook = new Robot(row(), column(), randomDirection(), randomCoins());
     Robot bishop = new Robot(row(), column(), randomDirection(), 0);
-    rookMovement(rook);
+    while (true) {
+      rookMovement(rook);
+      bishopMovement(rook, bishop);
+      if (!rook.hasAnyCoins()) {
+        System.out.println("Tower has won!");
+        break;
+      }
+      if (rook.getX() == bishop.getX() && rook.getY() == bishop.getY()) {
+        System.out.println("Walker has won!");
+        break;
+      }
+    }
+  }
+
+  /**
+   * Checks if the
+   * @param robot can move
+   * @return true or false
+   */
+  public boolean canMove(Robot robot) {
+    switch (robot.getDirection()) {
+      case UP:
+        return robot.getY() != World.getHeight() - 1;
+      case RIGHT:
+        return robot.getX() != World.getWidth() - 1;
+      case DOWN:
+        return robot.getY() != 0;
+      case LEFT:
+        return robot.getX() != 0;
+      default:
+        throw new IllegalArgumentException("Fehler");
+    }
   }
 
   /**
@@ -92,8 +123,22 @@ public class RookAndBishop {
    */
   private void rookMovement(Robot rook) {
     rook.putCoin();
-    if (rook.isFrontClear()) {
+    int turn = ThreadLocalRandom.current().nextInt(4);
+    if (canMove(rook)) {
       rook.move();
+    } else {
+      if (turn > 1) {
+        rook.turnLeft();
+        rook.turnLeft();
+      }
+    }
+    if (turn ==1) {
+      rook.turnLeft();
+    }
+    if (turn == 0) {
+      rook.turnLeft();
+      rook.turnLeft();
+      rook.turnLeft();
     }
   }
 
@@ -101,6 +146,32 @@ public class RookAndBishop {
    * Exercise 3.2 of H01
    */
   private void bishopMovement(Robot rook, Robot bishop) {
-    // Hier programmieren
+    boolean notFinished = true;
+    while (notFinished) {
+      if (canMove(bishop)) {
+        bishop.move();
+        bishop.turnLeft();
+        if (canMove(bishop)) {
+          bishop.move();
+          bishop.turnLeft();
+          bishop.turnLeft();
+          bishop.turnLeft();
+        } else {
+          bishop.turnLeft();
+          bishop.turnLeft();
+          notFinished = false;
+        }
+      } else {
+        bishop.turnLeft();
+        notFinished = false;
+      }
+      if (bishop.isNextToACoin()) {
+        bishop.pickCoin();
+        notFinished = false;
+      }
+      if (bishop.getX() == rook.getX() && bishop.getY() == rook.getY()) {
+        notFinished = false;
+      }
+    }
   }
 }
